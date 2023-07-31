@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Martini Visualization - Vaccination Trends</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top-left">
+    <a href="index2.html"><button>Go to Page 2</button></a>
+    <a href="index3.html"><button>Go to Page 3</button></a>
+  </div>
+  <h1>Martini Visualization - Vaccination Trends</h1>
+  <p>
+    I will be presenting a Martini Visualization about trends in Covid-19 vaccinations around the world over time period December 2020 - March 2022.
+    Walk through the entire visualization to discover the final insights about vaccination trends.This graph shows the top vaccinations delivered to people around the world (Argentina, Austria, Belgium, Bulgaria, Chile, Croatia,Cyprus, Czechia, Denmark, Ecuador, Estonia, Finland,France, Germany, Hong Kong, Hungary, Iceland, Ireland,Italy', 'Japan', 'Latvia', 'Liechtenstein', 'Lithuania',
+    Luxembourg, Malta, Nepal, Netherlands, Norway, Peru, Poland, Portugal, Romania, Slovakia, Slovenia,South Africa, South Korea, Spain, Sweden, Switzerland,
+    Ukraine, United States, Uruguay, European Union). Hover over bars to see actual numbers. As you can see, Pfizer, Moderna, and AstroZeneca are the most vaccinated shots.
+  </p>
+  <div id="chart"></div>
+  <script>
+    // Load the data from the CSV file
+    d3.csv("vaccination_numbers.csv").then(function(data) {
+      // Create an SVG element and append it to the HTML document
+      var svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", 800)
+        .attr("height", 600);
+
+      // Define the margins and the inner width and height
+      var margin = {top: 50, right: 0, bottom: 200, left: 200}; // Increased bottom margin for x-axis label
+      var width = svg.attr("width") - margin.left - margin.right;
+      var height = svg.attr("height") - margin.top - margin.bottom;
+
+      // Define the scales for the x and y axes
+      var x = d3.scaleBand()
+        .domain(data.map(function(d) { return d.vaccine; }))
+        .range([0, width])
+        .padding(0.1);
+
+      var y = d3.scaleLinear()
+        .domain([0, d3.max(data, function(d) { return +d.total_vaccinations; })])
+        .range([height, 0]);
+
+      // Create a group element for appending the axes and bars
+      var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      // Create the x-axis and append it to the group
+      g.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end") // Align the x-axis labels to the end of each bar
+        .attr("dx", "-0.8em") // Adjust the x position of the x-axis labels
+        .attr("dy", "-0.15em") // Adjust the y position of the x-axis labels
+        .attr("transform", "rotate(-45)"); // Rotate the x-axis labels
+
+      // Create the y-axis and append it to the group
+      g.append("g")
+        .call(d3.axisLeft(y));
+
+      // Create the bars and append them to the group
+      g.selectAll(".bar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.vaccine); })
+        .attr("y", function(d) { return y(+d.total_vaccinations); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(+d.total_vaccinations); })
+        .append('title')
+        .text((d) => {return d.total_vaccinations});
+      // Add x-axis label
+      svg.append("text")
+        .attr("x", width / 2 + margin.left)
+        .attr("y", height + margin.top + 110) // Increased y position for better spacing
+        .attr("text-anchor", "middle")
+        .style("font-style", "italic")
+        .style("fill", "blue")
+        .text("Vaccine");
+
+      // Add y-axis label
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 1.6)
+        .attr("y", margin.left-120) // Increased y position for better spacing
+        .attr("text-anchor", "middle")
+        .style("font-style", "italic")
+        .style("fill", "blue")
+        .text("Total Vaccinations");
+    });
+  </script>
+</body>
+</html>

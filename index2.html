@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Vaccination Trends - Line Graph</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .annotation-group{
+font-size: 12px;
+    }
+
+    g.annotation-group line {
+  display: none
+}
+    #chart {
+      margin-top: 20px;
+    }
+
+    h1, p {
+      text-align: left;
+      margin: 5px;
+    }
+
+    h1 {
+      margin-bottom: 0px; /* Move the heading down by 50 pixels */
+      margin-top: 50px;
+      margin-left: 50px;
+    }
+
+    p {
+      max-width: 600px;
+      margin-top: 10px; /* Move the paragraph down by 50 pixels */
+      margin-left: 50px;
+    }
+
+    .legend {
+      position: absolute;
+      top: 20px;
+      right: 0px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      margin-left: 80px;
+      border: 1px solid black;
+    }
+    .top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  
+  /* Style the buttons */
+  button {
+    margin-right: 5px; /* Add some spacing between buttons */
+  }
+  </style>
+</head>
+<body>
+  <div class="top-left">
+    <a href="index.html"><button>Go to Page 1</button></a>
+    <a href="index3.html"><button>Go to Page 3</button></a>
+  </div>
+  <div class="legend">
+    <svg id="legendTitle" width="100%" height="30">
+        <text class="legend-title" text-anchor="middle" font-size="20px" x="50%" y="22">
+          Top 3 Vaccines
+        </text>
+      </svg>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: steelblue;"></div>
+      Pfizer/BioNTech
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: orange;"></div>
+      AstraZeneca
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: green;"></div>
+      Moderna
+    </div>
+  </div>
+  <h1>Total Number of Vaccinations Each Month</h1>
+  <p>
+    This graph depicts the growth of the delivery of the top 3 Coronavirus vaccines around the world (in the selected countries) from December 2020 (x-axis: 1) to March 2022 (x-axis: 16).
+    The previous visualization had already established that Pfizer is significantly more popular overall than the other vaccines; however, this visualization establishes that even the growth rate over the past couple of years was significantly steeper than others.
+  </p>
+  <div id="chart"></div>
+  <script>
+    // Load data for Pfizer/BioNTech vaccine
+    d3.csv("Pfizer.csv").then(function(pfizerData) {
+      // Load data for AstraZeneca vaccine
+      d3.csv("AstraZeneca.csv").then(function(astrazenecaData) {
+        // Load data for Moderna vaccine
+        d3.csv("Moderna.csv").then(function(modernaData) {
+          // Convert 'number' field to integer
+          pfizerData.forEach(function(d) {
+            d.number = +d.number;
+            d.total_vaccinations = +d.total_vaccinations;
+          });
+
+          astrazenecaData.forEach(function(d) {
+            d.number = +d.number;
+            d.total_vaccinations = +d.total_vaccinations;
+          });
+
+          modernaData.forEach(function(d) {
+            d.number = +d.number;
+            d.total_vaccinations = +d.total_vaccinations;
+          });
+
+          // Set up SVG container
+          var svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
+
+          // Define margins and dimensions
+          var margin = {top: 20, right: 50, bottom: 60, left: 115};
+          var width = svg.attr("width") - margin.left - margin.right;
+          var height = svg.attr("height") - margin.top - margin.bottom;
+
+//           const makeAnnotations2 = d3.annotation()
+//  .annotations(annotations);
+
+          // Create scales for x and y axes
+          var x = d3.scaleLinear()
+            .domain(d3.extent(pfizerData, function(d) { return d.number; }))
+            .range([0, width]);
+
+          var y = d3.scaleLinear()
+            .domain([0, d3.max(pfizerData, function(d) { return d.total_vaccinations; })])
+            .range([height, 0]);
+
+          // Create a group element for the chart
+          var g = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          // Generate line generators for each vaccine
+          var line = d3.line()
+            .x(function(d) { return x(d.number); })
+            .y(function(d) { return y(d.total_vaccinations); });
+
+
+          // Append path for Pfizer/BioNTech vaccine
+          g.append("path")
+            .datum(pfizerData)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("stroke", "steelblue")
+            .attr("fill", "none"); // Set fill to none
+
+          // Append path for AstraZeneca vaccine
+          g.append("path")
+            .datum(astrazenecaData)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("stroke", "orange")
+            .attr("fill", "none"); // Set fill to none
+
+          // Append path for Moderna vaccine
+          g.append("path")
+            .datum(modernaData)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("stroke", "green")
+            .attr("fill", "none"); // Set fill to none
+
+          // Create circles for each data point for Pfizer/BioNTech vaccine
+          g.selectAll(".point-pfizer")
+            .data(pfizerData)
+            .enter()
+            .append("circle")
+            .attr("class", "point-pfizer")
+            .attr("cx", function(d) { return x(d.number); })
+            .attr("cy", function(d) { return y(d.total_vaccinations); })
+            .attr("r", 4)
+            .style("fill", "steelblue");
+
+          // Create circles for each data point for AstraZeneca vaccine
+          g.selectAll(".point-astrazeneca")
+            .data(astrazenecaData)
+            .enter()
+            .append("circle")
+            .attr("class", "point-astrazeneca")
+            .attr("cx", function(d) { return x(d.number); })
+            .attr("cy", function(d) { return y(d.total_vaccinations); })
+            .attr("r", 4)
+            .style("fill", "orange");
+
+          // Create circles for each data point for Moderna vaccine
+          g.selectAll(".point-moderna")
+            .data(modernaData)
+            .enter()
+            .append("circle")
+            .attr("class", "point-moderna")
+            .attr("cx", function(d) { return x(d.number); })
+            .attr("cy", function(d) { return y(d.total_vaccinations); })
+            .attr("r", 4)
+            .style("fill", "green");
+
+          // Create x-axis
+          g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).ticks(pfizerData.length).tickFormat(d3.format("d")))
+            .selectAll("text")
+            .attr("transform", "rotate(0)")
+            .attr("x", 0)
+            .attr("y", 10)
+            .style("text-anchor", "end");
+
+          // Create y-axis
+          g.append("g")
+            .call(d3.axisLeft(y));
+
+          // Add x-axis label
+          svg.append("text")
+            .attr("x", width / 2 + margin.left)
+            .attr("y", height + margin.top + margin.bottom - 10)
+            .attr("text-anchor", "middle")
+            .style("font-style", "italic")
+            .style("fill", "blue")
+            .text("Number");
+
+          // Add y-axis label
+          svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2 - margin.top)
+            .attr("y", margin.left - 100)
+            .attr("text-anchor", "middle")
+            .style("font-style", "italic")
+            .style("fill", "blue")
+            .text("Total Vaccinations");
+
+            const annotations = [
+            {
+                note: {
+                label: "Regardless of the difference in slopes, all the vaccines seem to drop and increase around the same times",
+                align: "left",
+                wrap: 150,
+
+        },
+
+        x: 550,
+                y: 250,
+        
+        }
+    ]
+    const makeAnnotations = d3.annotation()
+ .annotations(annotations);
+
+ svg.append("g")
+ .attr("class", "annotation-group")
+ .call(makeAnnotations)
+
+        });
+      });
+    });
+  </script>
+</body>
+</html>

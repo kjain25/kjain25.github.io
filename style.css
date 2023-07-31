@@ -1,0 +1,148 @@
+  #chart {
+    margin-top: 20px;
+  }
+
+  h1, p {
+    text-align: center;
+  }
+
+  p {
+    max-width: 600px; /* Adjust the width as needed */
+  }
+
+  .bar {
+    fill: steelblue;
+  }
+
+  .bar:hover {
+    fill: #4682B4;
+  }
+
+  /* Style the x-axis labels */
+  .x-axis text {
+    transform: rotate(-45deg);
+    text-anchor: end;
+  }
+  #tooltip{
+        position: absolute;
+        width:200px;
+        height: auto;
+        padding: 10px;
+        background-color: blanchedalmond;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+  } 
+  #tooltip.hidden{
+    display: none;
+  }
+  #tooltip p{
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  #chart {
+    margin-top: 20px;
+  }
+
+  h1, p {
+    text-align: left;
+    margin-top: 0px;
+  }
+
+  h1 {
+    margin-top: 80px; /* Add margin to move the heading down */
+  }
+
+  p {
+    max-width: 600px; /* Adjust the width as needed */
+  }
+
+  .bar {
+    fill: steelblue;
+  }
+
+  .bar:hover {
+    fill: #4682B4;
+  }
+
+  /* Style the x-axis labels */
+  .x-axis text {
+    transform: rotate(-45deg);
+    text-anchor: end;
+  }
+  /* Add styles for the top-left div */
+.top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  
+  /* Style the buttons */
+  button {
+    margin-right: 5px; /* Add some spacing between buttons */
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .annotation-group{
+font-size: 12px;
+  }
+
+  g.annotation-group line {
+display: none
+}
+
+  #chart {
+    margin-top: 20px;
+  }
+
+  h1, p {
+    text-align: left;
+    margin: 5px;
+  }
+
+  h1 {
+    margin-bottom: 0px; /* Move the heading down by 50 pixels */
+    margin-top: 50px;
+    margin-left: 50px;
+  }
+
+  p {
+    max-width: 600px;
+    margin-top: 10px; /* Move the paragraph down by 50 pixels */
+    margin-left: 50px;
+  }
+
+  .legend {
+    position: absolute;
+    top: 20px;
+    right: 0px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin: 5px;
+  }
+
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    margin-left: 80px;
+    border: 1px solid black;
+  }  

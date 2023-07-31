@@ -1,0 +1,262 @@
+ <!DOCTYPE html>
+ <html>
+ <head>
+   <meta charset="utf-8">
+   <title>Vaccine Distribution and Deaths Rate</title>
+   <script src="https://d3js.org/d3.v6.min.js"></script>
+   <style>
+     /* Your CSS styles here */
+     .top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  
+  /* Style the buttons */
+  button {
+    margin-right: 5px; /* Add some spacing between buttons */
+  }
+     #paragraph {
+      width: 1000px; /* Adjust the width as desired */
+      font-size: 18px; /* Adjust the font size as desired */
+      margin: 20px auto; /* Center the paragraph horizontally */
+      text-align: left; /* Justify the text */
+    }
+     .container {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       margin-top: 30px;
+       margin-right: 100px;
+     }
+ 
+     #country {
+       width: 400px; /* Increase the width of the dropdown */
+       height: 30px;
+       font-size: 20px;
+       margin-top: 10px; /* Increase the font size of the dropdown */
+     }
+ 
+     #chart {
+       margin-top: 50px;
+       position: relative;
+       width: 500px; /* or any other value */
+       margin-left: auto;
+       margin-right: auto;
+     }
+ 
+     #legend {
+       position: absolute;
+       top: 10px;
+       right: 0px;
+       font-size: 14px;
+       text-align: right;
+     }
+     #paragraph span.bold-red {
+      color: red;
+      font-weight: bold;
+    }
+ 
+     #deaths {
+       font-size: 20px; /* Increase the font size of the death rate */
+       font-weight: bold;
+       margin-top: 30px;
+       position: relative;
+       width: 650px; /* or any other value */
+       margin-left: 400px;
+       margin-right: 0 px;
+     }
+ 
+     .title {
+       font-size:0px; /* Increase the font size of the title */
+       text-anchor: middle;
+     }
+ 
+     .legend-item {
+       display: flex;
+       align-items: center;
+       margin-bottom: 5px;
+     }
+ 
+     .legend-color {
+       width: 20px;
+       height: 20px;
+       margin-left:110px;
+       margin-right: 5px;
+       border: 1px solid black;
+     }
+     label[for="country"] {
+    font-size: 20px; /* Adjust the font size as desired */
+  }
+   </style>
+ </head>
+ <body>
+  <div class="top-left">
+    <a href="index.html"><button>Go to Page 1</button></a>
+    <a href="index2.html"><button>Go to Page 2</button></a>
+  </div>
+   <div class="container">
+     <label for="country">Select Country:</label>
+     <select id="country"></select>
+   </div>
+   <div id="chart"></div>
+   <div id="deaths"></div>
+   <div id="legend">
+     <!-- Add the title for the legend -->
+     <svg id="legendTitle" width="100%" height="30">
+       <text class="legend-title" text-anchor="middle" font-size="25px" x="50%" y="22">
+         Legend Title
+       </text>
+     </svg>
+   </div>
+   <div id="paragraph">
+    <p>
+      From this visualization, it's pretty evident that countries with more Pfizer vaccinations has smaller death rates. The average death rate per 1 million people is <span class = "bold-red">2639.902</span> for countries in this presentation, and as you can observe, majority of the countries that are below the average death rate get most vaccinated with Pfizer. Look through the pie charts to observe this pattern.
+    </p>
+  </div>
+   <script>
+     // Set up the width and height for the pie chart
+     var width = 400;
+     var height = 400;
+     var radius = Math.min(width, height) / 2;
+ 
+     // Create an SVG element for the pie chart
+     var svg = d3.select("#chart")
+       .append("svg")
+       .attr("width", width)
+       .attr("height", height)
+       .append("g")
+       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+ 
+     // Standard colors for each vaccine
+     var colorScale = d3.scaleOrdinal()
+       .domain([
+         'CanSino', 'Moderna', 'Oxford/AstraZeneca', 'Pfizer/BioNTech',
+         'Sinopharm/Beijing', 'Sputnik V', 'Johnson&Johnson', 'Novavax',
+         'Sinovac', 'Covaxin'
+       ])
+       .range([
+         'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'black', 'gray', 'pink'
+       ]);
+ 
+     // Load the CSV data for death rates
+     d3.csv("death_rates.csv").then(function(deathData) {
+       // Load the CSV data for vaccine counts
+       d3.csv("country_numbers.csv").then(function(vaccineData) {
+         // Get the list of countries for the dropdown
+         var countries = deathData.map(function(d) { return d.location; });
+ 
+         // Add the country options to the dropdown
+         var dropdown = d3.select("#country");
+         var options = dropdown.selectAll("option")
+           .data(countries);
+ 
+         options.enter()
+           .append("option")
+           .merge(options)
+           .attr("value", function(d) { return d; })
+           .text(function(d) { return d; });
+ 
+         options.exit().remove();
+ 
+         // Update the pie chart, legend, and text when a country is selected
+         dropdown.on("change", function() {
+           var selectedCountry = this.value;
+ 
+           // Filter the data for the selected country from vaccineData
+           var filteredVaccineData = vaccineData.filter(function(d) {
+             return d.location === selectedCountry;
+           });
+ 
+           // Prepare data for the pie chart
+           var pieData = filteredVaccineData.map(function(d) {
+             return {
+               vaccine: d.vaccine,
+               vaccine_count: +d.total_vaccinations
+             };
+           });
+ 
+           // Calculate the total vaccinations count for the selected country
+           var totalVaccinations = d3.sum(pieData, function(d) {
+             return d.vaccine_count;
+           });
+ 
+           // Update the pie chart data
+           var pie = d3.pie()
+             .value(function(d) { return +d.vaccine_count; });
+ 
+           var pieData = pie(pieData);
+ 
+           // Update the pie slices
+           var arc = d3.arc()
+             .innerRadius(0)
+             .outerRadius(radius);
+ 
+           var slices = svg.selectAll("path")
+             .data(pieData);
+ 
+           slices.enter()
+             .append("path")
+             .merge(slices)
+             .attr("d", arc)
+             .attr("fill", function(d) { return colorScale(d.data.vaccine); });
+            //  append("title") // <-- Add title element for tooltips
+            // .text(function(d) { return d.data.vaccine + ": " + d.data.vaccine_count; });
+ 
+           slices.exit().remove();
+ 
+           // Filter the data for the selected country from deathData
+           var filteredDeathData = deathData.find(function(d) {
+             return d.location === selectedCountry;
+           });
+ 
+           // Display the "Deaths/1M pop" rate for the selected country
+           var deathsRate = filteredDeathData["Deaths/1M pop"];
+           d3.select("#deaths")
+             .text("Deaths from Covid per 1 million people in the respective country: " + deathsRate);
+ 
+           // Update the legend
+           var legend = d3.select("#legend")
+             .selectAll(".legend-item")
+             .data(colorScale.domain());
+ 
+           var legendItem = legend.enter()
+             .append("div")
+             .attr("class", "legend-item")
+             .style("display", "flex");
+ 
+           legendItem.append("div")
+             .attr("class", "legend-color")
+             .style("background-color", function(d) { return colorScale(d); });
+ 
+           legendItem.append("div")
+             .text(function(d) { return d; });
+ 
+           legend.exit().remove();
+ 
+           // Display the title for the pie chart
+           var title = svg.selectAll(".title").data([selectedCountry]);
+           title.enter()
+             .append("text")
+             .attr("class", "title")
+             .attr("text-anchor", "middle")
+             .attr("font-size", "24px")
+             .merge(title)
+             .text(function(d) { return d; })
+             .attr("dy", "-180px");
+ 
+           // Display the legend title
+           var legendSvg = d3.select("#legendTitle");
+           var legendTitleText = legendSvg.select(".legend-title");
+           legendTitleText.text("Vaccines");
+ 
+         });
+ 
+         // Trigger initial update with the first country in the dropdown
+         dropdown.dispatch("change");
+       });
+     });
+   </script>
+ </body>
+ </html>
+ 
